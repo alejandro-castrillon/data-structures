@@ -1,0 +1,15 @@
+1) Para las clases Prefix y Postfix, es necesario usar un diccionario, se debe
+   usar las clases existentes, crear una clase diccionario o usar la clase
+   diccionario de python?
+
+2) Para las clases Prefix y Postfix, cuando se ingrese una expresion infija
+   al crear alguna de estas clases y esta expresion contenga un caracter
+   invalido, se debe mostrar un mensaje de error o usar una Exception?
+
+3) Es correcta la expresion de la forma "3 (4 - 2)"?
+
+4) Para las clases Prefix y Postfix, se permiten numeros decimales?
+
+5) Para las clases Prefix y Postfix, es posible usar listas de python u
+   obligatoriamente se debe usar la SimplyLinkedList?, en este caso
+   se pueden añadir mas metodos a la SimplyLinkedList?
