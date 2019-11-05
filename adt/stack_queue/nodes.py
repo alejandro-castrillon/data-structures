@@ -1,9 +1,9 @@
 class StackNode:
-    def __init__(self,data):
+    def __init__(self, data):
         self.data = data
         self.next = None
 
 class QueueNode:
-	def __init__(self):
+	def __init__(self, data):
 		self.data = data
 		self.next = None

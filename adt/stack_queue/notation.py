@@ -1,3 +1,4 @@
+from adt.lists.sll import SinglyLinkedList
 from adt.stack_queue.stack import Stack
 
 
@@ -19,7 +20,6 @@ class Postfix:
     """
 
     def __init__(self, expresión_infix: str) -> None:
-        self.operators = {"+": 0, "-": 0, "*": 1, "/": 1, "^": 2, ")": 3, "(": 4}
         if self.__verify_expression(expresión_infix):
             self.expression_infix = self.__format_expression(expresión_infix)
 
@@ -37,11 +37,43 @@ class Postfix:
         haciendo uso de una Stack. Separar operandos y operadores por un
         espacio en blanco.
         """
-        expression_postfix = ""
+        priorities = {"+": 1, "-": 1, "*": 2, "/": 2, "^": 3, ')': 4}
+        operators_stack = Stack()
 
-        # Place Parenthesis
+        infix_list = self.__split(self.expression_infix, ' ')
+        postfix_list = SinglyLinkedList()
 
-        return expression_postfix
+        for i in infix_list:
+            try:
+                _ = float(i)
+                postfix_list.append(i)
+                continue
+            except:
+                pass
+            if i == '(':
+                while operators_stack.peek() != ')' and not operators_stack.is_empty():
+                    postfix_list.append(operators_stack.pop())
+            elif i in priorities:
+                if operators_stack.is_empty():
+                    operators_stack.push(i)
+                else:
+                    top = operators_stack.pop()
+                    if priorities[i] >= priorities[top] or top == ')':
+                        operators_stack.push(top)
+                    else:
+                        postfix_list.append(top)
+                        while operators_stack.peek() != ')' and not operators_stack.is_empty():
+                            postfix_list.append(operators_stack.pop())
+                    operators_stack.push(i)
+
+        while not operators_stack.is_empty():
+            postfix_list.append(operators_stack.pop())
+
+        expression_postfix = ''
+        for i in postfix_list:
+            expression_postfix += str(i) + ' '
+
+        return expression_postfix[:len(expression_postfix) - 1]
 
     def arithmetic_expression_evaluation(self) -> float:
         """
@@ -53,56 +85,58 @@ class Postfix:
         return result
 
     def __verify_expression(self, expression: str) -> bool:
-        expression = self.__format_expression(expression)
+        verify_characters = self.__verify_characters(expression)
+        verify_operators = self.__verify_operators(expression)
+        balanced_parenthesis = self.__balanced_parenthesis(expression)
 
-        # Verify Characters
-        numbers = [str(i) for i in range(10)]
+        return verify_characters and verify_operators and balanced_parenthesis
+
+    def __verify_characters(self, expression: str):
+        expression = self.__remove_spaces(expression)
         for i in expression:
-            if i not in self.operators and i not in ". " and i not in numbers:
+            if i not in '+-*/^().' and not i.isdigit():
                 raise Exception(f"Invalid character: {i}")
                 return False
+        return True
 
-        # Verify Order
-        while " " in expression:
-            expression = expression.replace(" ", "")
-        expression = ' '.join(expression)
-        expression = expression.split(' ')
+    def __verify_operators(self, expression):
+        expression = self.__remove_spaces(expression)
 
         for i in range(len(expression)):
             try:
                 bad_order = (
                     (expression[i] in '+-*/^(.' and expression[i + 1] in '+*/^).')
                     or (expression[i] == '(' and expression[i + 1] == '-')
+                    or expression[0] in '+*/^).'
+                    or expression[len(expression)] in '+*/^(.'
                 )
             except:
                 bad_order = False
             if bad_order:
-                raise Exception("Bad order of operators, parenthesis or dots")
+                raise Exception(
+                    f"Bad order of operators, parenthesis or dots at character {i}"
+                )
                 return not bad_order
+        return True
 
-        # Balanced Parenthesis
+    def __balanced_parenthesis(self, expression: str):
         stack = Stack()
-        err = False
+        error = False
         for i in expression:
             if i == '(':
                 stack.push(i)
             elif i == ')':
                 if stack.is_empty():
-                    err = True
+                    error = True
                     break
                 stack.pop()
-
-        if err or not stack.is_empty():
+        if error or not stack.is_empty():
             raise Exception('The parenthesis are not balanced')
             return False
-
         return True
 
     def __format_expression(self, expression: str) -> str:
-        # Remove spaces
-        expression = expression.strip()
-        while " " in expression:
-            expression = expression.replace(" ", "")
+        expression = self.__remove_spaces(expression)
 
         # Separate Characters
         array = " ".join(expression)
@@ -123,6 +157,25 @@ class Postfix:
             expression = expression.replace(" . ", ".")
 
         return expression
+
+    def __remove_spaces(self, expression):
+        expression = expression.strip()
+        while " " in expression:
+            expression = expression.replace(" ", "")
+        return expression
+
+    def __split(self, string: str, char=''):
+        _list = SinglyLinkedList()
+        if char:
+            while char in string:
+                index = string.find(char)
+                _list.append(string[: index])
+                string = string[index + 1 :]
+            _list.append(string)
+        else:
+            for i in string:
+                _list.append(i)
+        return _list
 
 
 class Prefix:
