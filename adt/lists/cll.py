@@ -49,29 +49,6 @@ class CircularLinkedList:
     def remove(self, rel_pos) -> bool:
         if not self.is_empty():
             return self.delete(self.roulette(rel_pos))
-        # 	aux = rel_pos
-        # 	while aux >= len(self):
-        # 		aux -= len(self)
-        #
-        # 	if rel_pos == 0 or aux == 0:
-        # 		self.head = self.head.next
-        # 		self.tail.next = self.head
-        # 		return True
-        #
-        # 	elif rel_pos > 0:
-        # 		current_node = self.head
-        # 		cont = 0
-        # 		while cont < rel_pos - 1:
-        # 			current_node = current_node.next
-        # 			cont += 1
-        #
-        # 		if rel_pos == len(self) - 1:
-        # 			self.tail = current_node
-        #
-        # 		current_node.next = current_node.next.next
-        # 		self.tail.next = self.head
-        # 		return True
-        # return False
 
     def delete(self, data, all=False) -> bool:
         deleted = False

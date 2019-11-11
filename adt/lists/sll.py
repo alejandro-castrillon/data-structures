@@ -2,31 +2,31 @@ from adt.lists.nodes import SinglyLinkedNode
 
 
 class SinglyLinkedList:
-    def __init__(self):
+    def __init__(self) -> None:
         self.head = None
 
-    def __iter__(self):
+    def __iter__(self) -> object:
         current_node = self.head
         while current_node:
             yield current_node.data
             current_node = current_node.next
 
-    def __str__(self):
-        string = ""
+    def __str__(self) -> str:
+        acm = ""
         for i in self:
-            string += str(i)+ '\n'
-        return string
+            acm += str(i) + "\n"
+        return acm
 
-    def __len__(self):
+    def __len__(self) -> int:
         cnt = 0
         for _ in self:
             cnt += 1
         return cnt
 
-    def is_empty(self):
+    def is_empty(self) -> bool:
         return self.head == None
 
-    def append(self, new_data):
+    def append(self, new_data) -> bool:
         new_node = SinglyLinkedNode(new_data)
         if self.is_empty():
             self.head = new_node
@@ -39,24 +39,24 @@ class SinglyLinkedList:
             return False
         return True
 
-    def insert(self, new_data, pos=0):
+    def insert(self, new_data, pos=0) -> bool:
         new_node = SinglyLinkedNode(new_data)
         if pos == 0:
             new_node.next = self.head
             self.head = new_node
-        elif pos == len(self):
-            return self.append(new_data)
-        elif pos < len(self):
-            cnt = 0
-            current_node = self.head
-            while cnt < pos - 1:
-                current_node = current_node.next
-            current_node.next, new_node.next = new_node, current_node.next
-        else:
-            return False
-        return True
+            return True
+        elif not self.is_empty() and type(new_data) == type(self.head.data):
+            if pos == len(self):
+                return self.append(new_data)
+            elif 0 < pos < len(self):
+                current_node = self.head
+                for i in range(pos - 1):
+                    current_node = current_node.next
+                current_node.next, new_node.next = new_node, current_node.next
+                return True
+        return False
 
-    def delete(self, data, all=False):
+    def delete(self, data, all=False) -> bool:
         flag = False
         if not self.is_empty():
             if self.head.data == data:
@@ -74,35 +74,21 @@ class SinglyLinkedList:
             flag = self.delete(data)
         return flag
 
-    def remove(self, pos):
+    def remove(self, pos) -> bool:
         if not self.is_empty():
             return self.delete(self.locate(pos))
 
-    def search(self, data):
+    def search(self, data) -> object:
         for i in self:
             if i == data:
                 return i
 
-    def locate(self, pos):
+    def locate(self, pos) -> object:
         cnt = 0
         for i in self:
             if cnt == pos:
                 return i
             cnt += 1
-            
-    def explorer(self):
+
+    def explorer(self) -> None:
         print(self)
-
-    # def reverse(self):
-    #     pass
-    
-
-
-# def bubblesort(_list):
-#     for i in range(len(_list)-1,0,-1):
-#         for j in range(i):
-#             if _list[j]>_list[j+1]:
-#                 _list[j],_list[j+1]=_list[j+1],_list[j]
-#                 # aux =_list[j]
-#                 # _list[j]=_list[j+1]
-#                 # _list[j+1] =aux

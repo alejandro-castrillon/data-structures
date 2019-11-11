@@ -20,8 +20,7 @@ class Postfix:
     """
 
     def __init__(self, expresión_infix: str) -> None:
-        if self.__verify_expression(expresión_infix):
-            self.expression_infix = self.__format_expression(expresión_infix)
+        self.expression_infix = expresión_infix
 
     def infix(self) -> str:
         """
@@ -29,7 +28,10 @@ class Postfix:
         operando y cada operador, incluyendo los paréntesis, por un espacio
         en blanco.
         """
-        return self.expression_infix
+
+        if self.__verify_expression(self.expression_infix):
+            self.expression_infix = self.__format_expression(self.expression_infix)
+            return self.expression_infix
 
     def postfix(self) -> str:
         """
@@ -37,51 +39,64 @@ class Postfix:
         haciendo uso de una Stack. Separar operandos y operadores por un
         espacio en blanco.
         """
-        priorities = {"+": 1, "-": 1, "*": 2, "/": 2, "^": 3, ')': 4}
+        priorities = {"+": 1, "-": 1, "*": 2, "/": 2, "^": 3, "(": 0}
         operators_stack = Stack()
 
-        infix_list = self.__split(self.expression_infix, ' ')
+        infix_list = self.__split_expression(self.infix(), " ")
         postfix_list = SinglyLinkedList()
 
         for i in infix_list:
-            try:
-                _ = float(i)
+            if self.__isdigit(i):
                 postfix_list.append(i)
-                continue
-            except:
-                pass
-            if i == '(':
-                while operators_stack.peek() != ')' and not operators_stack.is_empty():
-                    postfix_list.append(operators_stack.pop())
+            elif i == ")":
+                top = operators_stack.pop()
+                while top != "(" and not operators_stack.is_empty():
+                    postfix_list.append(top)
+                    top = operators_stack.pop()
+            elif i == "(":
+                operators_stack.push(i)
             elif i in priorities:
                 if operators_stack.is_empty():
                     operators_stack.push(i)
                 else:
-                    top = operators_stack.pop()
-                    if priorities[i] >= priorities[top] or top == ')':
-                        operators_stack.push(top)
+                    top = operators_stack.peek()
+                    if priorities[i] > priorities[top] or i == top == "^":
+                        operators_stack.push(i)
                     else:
-                        postfix_list.append(top)
-                        while operators_stack.peek() != ')' and not operators_stack.is_empty():
-                            postfix_list.append(operators_stack.pop())
-                    operators_stack.push(i)
+                        while not operators_stack.is_empty():
+                            top = operators_stack.peek()
+                            if priorities[top] >= priorities[i]:
+                                postfix_list.append(operators_stack.pop())
+                            else:
+                                break
+                        operators_stack.push(i)
 
         while not operators_stack.is_empty():
             postfix_list.append(operators_stack.pop())
 
-        expression_postfix = ''
+        expression_postfix = ""
         for i in postfix_list:
-            expression_postfix += str(i) + ' '
+            expression_postfix += str(i) + " "
 
-        return expression_postfix[:len(expression_postfix) - 1]
+        return expression_postfix[: len(expression_postfix) - 1]
 
     def arithmetic_expression_evaluation(self) -> float:
         """
         Evaluación de la expresión aritmética en notación Postfix,
         utilizando una Stack, calculando el resultado final de la expresión.
         """
-        result = 0
+        result = None
+        postfix_list = self.__split_expression(self.postfix(), " ")
+        operands_stack = Stack()
 
+        for i in postfix_list:
+            if self.__isdigit(i):
+                operands_stack.push(i)
+            elif i in "+-*/^":
+                num2 = operands_stack.pop()
+                num1 = operands_stack.pop()
+                result = self.__operate(num1, num2, i)
+                operands_stack.push(str(result))
         return result
 
     def __verify_expression(self, expression: str) -> bool:
@@ -91,24 +106,24 @@ class Postfix:
 
         return verify_characters and verify_operators and balanced_parenthesis
 
-    def __verify_characters(self, expression: str):
+    def __verify_characters(self, expression: str) -> bool:
         expression = self.__remove_spaces(expression)
         for i in expression:
-            if i not in '+-*/^().' and not i.isdigit():
+            if i not in "+-*/^()." and not i.isdigit():
                 raise Exception(f"Invalid character: {i}")
                 return False
         return True
 
-    def __verify_operators(self, expression):
+    def __verify_operators(self, expression: str) -> bool:
         expression = self.__remove_spaces(expression)
 
         for i in range(len(expression)):
             try:
                 bad_order = (
-                    (expression[i] in '+-*/^(.' and expression[i + 1] in '+*/^).')
-                    or (expression[i] == '(' and expression[i + 1] == '-')
-                    or expression[0] in '+*/^).'
-                    or expression[len(expression)] in '+*/^(.'
+                    (expression[i] in "+-*/^(." and expression[i + 1] in "+*/^).")
+                    or (expression[i] == "(" and expression[i + 1] == "-")
+                    or expression[0] in "+*/^)."
+                    or expression[len(expression)] in "+*/^(."
                 )
             except:
                 bad_order = False
@@ -119,19 +134,19 @@ class Postfix:
                 return not bad_order
         return True
 
-    def __balanced_parenthesis(self, expression: str):
+    def __balanced_parenthesis(self, expression: str) -> bool:
         stack = Stack()
         error = False
         for i in expression:
-            if i == '(':
+            if i == "(":
                 stack.push(i)
-            elif i == ')':
+            elif i == ")":
                 if stack.is_empty():
                     error = True
                     break
                 stack.pop()
         if error or not stack.is_empty():
-            raise Exception('The parenthesis are not balanced')
+            raise Exception("The parenthesis are not balanced")
             return False
         return True
 
@@ -147,8 +162,8 @@ class Postfix:
         # Unite Numbers
         for i in range(len(expression)):
             try:
-                if expression[i].isdigit() and expression[i + 2].isdigit():
-                    expression = expression[: i + 1] + expression[i + 2 :]
+                if expression[i - 1].isdigit() and expression[i + 1].isdigit():
+                    expression = expression[:i] + expression[i + 1 :]
             except:
                 pass
 
@@ -158,24 +173,40 @@ class Postfix:
 
         return expression
 
-    def __remove_spaces(self, expression):
+    def __remove_spaces(self, expression: str) -> str:
         expression = expression.strip()
         while " " in expression:
             expression = expression.replace(" ", "")
         return expression
 
-    def __split(self, string: str, char=''):
-        _list = SinglyLinkedList()
-        if char:
-            while char in string:
-                index = string.find(char)
-                _list.append(string[: index])
-                string = string[index + 1 :]
-            _list.append(string)
+    def __split_expression(self, expression: str, sep: str = "") -> SinglyLinkedList:
+        splited_list = SinglyLinkedList()
+        if sep:
+            while sep in expression:
+                index = expression.find(sep)
+                splited_list.append(expression[:index])
+                expression = expression[index + 1 :]
+            splited_list.append(expression)
         else:
-            for i in string:
-                _list.append(i)
-        return _list
+            for i in expression:
+                splited_list.append(i)
+        return splited_list
+
+    def __isdigit(self, string: str) -> bool:
+        try:
+            float(string)
+            return True
+        except:
+            return False
+
+    def __operate(self, operand1: str, operand2: str, operator: str) -> float:
+        return {
+            "+": lambda a, b: a + b,
+            "-": lambda a, b: a - b,
+            "*": lambda a, b: a * b,
+            "/": lambda a, b: a / b,
+            "^": lambda a, b: a ** b,
+        }[operator](float(operand1), float(operand2))
 
 
 class Prefix:
@@ -195,7 +226,7 @@ class Prefix:
     """
 
     def __init__(self, infix_expression: str) -> None:
-        pass
+        self.infix_expression = infix_expression
 
     def infix(self) -> str:
         """
@@ -203,7 +234,9 @@ class Prefix:
         operando y cada operador, incluyendo los paréntesis, por un espacio
         en blanco.
         """
-        pass
+        if self.__verify_expression(self.infix_expression):
+            self.infix_expression = self.__format_expression(self.infix_expression)
+            return self.infix_expression
 
     def prefix(self) -> str:
         """
@@ -211,11 +244,190 @@ class Prefix:
         haciendo uso de una Stack. Separar operandos y operadores por un
         espacio en blanco.
         """
-        pass
+        priorities = {"+": 1, "-": 1, "*": 2, "/": 2, "^": 3, ")": 4}
+        operators_stack = Stack()
+
+        infix_expression = self.__reverse_expression(self.infix_expression)
+        infix_list = self.__split_expression(infix_expression, " ")
+        prefix_list = SinglyLinkedList()
+
+        for i in infix_list:
+            if self.__isdigit(i):
+                prefix_list.append(i)
+            elif i == "(":
+                top = operators_stack.pop()
+                while top != ")" and not operators_stack.is_empty():
+                    prefix_list.append(top)
+                    top = operators_stack.pop()
+            elif i in priorities:
+                if operators_stack.is_empty():
+                    operators_stack.push(i)
+                else:
+                    top = operators_stack.peek()
+                    if priorities[i] >= priorities[top] or top == ")":
+                        if i == top == "^":
+                            prefix_list.append(i)
+                        else:
+                            operators_stack.push(i)
+                    else:
+                        while not operators_stack.is_empty():
+                            top = operators_stack.peek()
+                            if priorities[top] > priorities[i] and top != ")":
+                                prefix_list.append(operators_stack.pop())
+                            else:
+                                break
+                        operators_stack.push(i)
+
+        while not operators_stack.is_empty():
+            prefix_list.append(operators_stack.pop())
+
+        expression_prefix = ""
+        for i in prefix_list:
+            expression_prefix += str(i) + " "
+
+        expression_prefix = expression_prefix[: len(expression_prefix) - 1]
+        expression_prefix = self.__reverse_expression(expression_prefix)
+
+        return expression_prefix
 
     def arithmetic_expression_evaluation(self) -> float:
         """
         Evaluación de la expresión aritmética en notación Prefix, utilizando
         una Stack, calculando el resultado final de la expresión.
         """
-        pass
+        result = None
+        expression_prefix = self.__reverse_expression(self.prefix())
+        postfix_list = self.__split_expression(expression_prefix, " ")
+        operands_stack = Stack()
+
+        for i in postfix_list:
+            if self.__isdigit(i):
+                operands_stack.push(i)
+            elif i in "+-*/^":
+                num1 = operands_stack.pop()
+                num2 = operands_stack.pop()
+                result = self.__operate(num1, num2, i)
+                operands_stack.push(str(result))
+        return result
+
+    def __verify_expression(self, expression: str) -> bool:
+        verify_characters = self.__verify_characters(expression)
+        verify_operators = self.__verify_operators(expression)
+        balanced_parenthesis = self.__balanced_parenthesis(expression)
+
+        return verify_characters and verify_operators and balanced_parenthesis
+
+    def __verify_characters(self, expression: str) -> bool:
+        expression = self.__remove_spaces(expression)
+        for i in expression:
+            if i not in "+-*/^()." and not i.isdigit():
+                raise Exception(f"Invalid character: {i}")
+                return False
+        return True
+
+    def __verify_operators(self, expression: str) -> bool:
+        expression = self.__remove_spaces(expression)
+
+        for i in range(len(expression)):
+            try:
+                bad_order = (
+                    (expression[i] in "+-*/^(." and expression[i + 1] in "+*/^).")
+                    or (expression[i] == "(" and expression[i + 1] == "-")
+                    or expression[0] in "+*/^)."
+                    or expression[len(expression)] in "+*/^(."
+                )
+            except:
+                bad_order = False
+            if bad_order:
+                raise Exception(
+                    f"Bad order of operators, parenthesis or dots at character {i}"
+                )
+                return not bad_order
+        return True
+
+    def __balanced_parenthesis(self, expression: str) -> bool:
+        stack = Stack()
+        error = False
+        for i in expression:
+            if i == "(":
+                stack.push(i)
+            elif i == ")":
+                if stack.is_empty():
+                    error = True
+                    break
+                stack.pop()
+        if error or not stack.is_empty():
+            raise Exception("The parenthesis are not balanced")
+            return False
+        return True
+
+    def __format_expression(self, expression: str) -> str:
+        expression = self.__remove_spaces(expression)
+
+        # Separate Characters
+        array = " ".join(expression)
+        expression = ""
+        for i in array:
+            expression += i
+
+        # Unite Numbers
+        for i in range(len(expression)):
+            try:
+                if expression[i - 1].isdigit() and expression[i + 1].isdigit():
+                    expression = expression[:i] + expression[i + 1 :]
+            except:
+                pass
+
+        # Unite Decimals
+        while " . " in expression:
+            expression = expression.replace(" . ", ".")
+
+        return expression
+
+    def __remove_spaces(self, expression: str) -> str:
+        expression = expression.strip()
+        while " " in expression:
+            expression = expression.replace(" ", "")
+        return expression
+
+    def __split_expression(self, expression: str, sep: str = ""):
+        splited_list = SinglyLinkedList()
+        if sep:
+            while sep in expression:
+                index = expression.find(sep)
+                splited_list.append(expression[:index])
+                expression = expression[index + 1 :]
+            splited_list.append(expression)
+        else:
+            for i in expression:
+                splited_list.append(i)
+        return splited_list
+
+    def __isdigit(self, string: str) -> bool:
+        try:
+            float(string)
+            return True
+        except:
+            return False
+
+    def __operate(self, operand1: str, operand2: str, operator: str) -> float:
+        return {
+            "+": lambda a, b: a + b,
+            "-": lambda a, b: a - b,
+            "*": lambda a, b: a * b,
+            "/": lambda a, b: a / b,
+            "^": lambda a, b: a ** b,
+        }[operator](float(operand1), float(operand2))
+
+    def __reverse_expression(self, expression: str) -> str:
+        expression = self.__split_expression(expression, " ")
+        stack = Stack()
+        for i in expression:
+            stack.push(i)
+
+        expression = ""
+        while not stack.is_empty():
+            expression += stack.pop() + " "
+
+        return expression[: len(expression) - 1]
+
