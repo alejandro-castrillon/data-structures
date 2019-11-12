@@ -149,42 +149,40 @@ class PriorityQueueNodes(Queue):
             new_node = PriorityNode(new_data, priority)
             if self.is_empty():
                 self._front = self.tail = new_node
-                print(
-                    'empty enqueued, data:',
-                    new_node.data,
-                    'priority:',
-                    new_node.priority,
-                    'front data:',
-                    self._front.data,
-                    'front priority:',
-                    self._front.priority,
-                )
                 return True
             elif type(new_data) == type(self.front()):
-                self.__enqueue(new_data, priority)
-                return True
+                return self.__enqueue(new_data, priority)
         return False
 
     def __enqueue(self, new_data, priority):
         new_node = PriorityNode(new_data, priority)
 
-        finded = False
         current_node = self._front
         while current_node:
-            if current_node.priority == priority:
-                finded = True
-                break
-            current_node = current_node.next
 
-        if finded:
-            current_node = self._front
-            while current_node:
-                if priority > current_node.priority:
-                    current_node.next, new_node.next = (
-                        new_node,
-                        current_node.next,
-                    )
-                    break
+            if current_node.priority == priority:
+                current_node = self._front
+                while current_node:
+
+                    if priority < current_node.priority:
+                        current_node = current_node.next
+                    else:
+                        current_node.next, new_node.next = (
+                            new_node,
+                            current_node.next,
+                        )
+                        print('entre')
+                        return True
+
+            elif current_node.priority < priority:
+                current_node.next, new_node.next = (
+                    new_node,
+                    current_node.next,
+                )
+                return True
+            else:
                 current_node = current_node.next
-        else:
-            self.tail.next = self.tail = new_node
+
+        print('fin')
+        self.tail.next = self.tail = new_node
+        return True

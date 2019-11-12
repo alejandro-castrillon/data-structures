@@ -12,7 +12,7 @@ class Queue:
         new_node = QueueNode(data)
         if self.is_empty():
             self._front = self.tail = new_node
-        elif type(data) == type(self._front()):
+        elif type(data) == type(self.front()):
             self.tail.next = self.tail = new_node
         else:
             return False
@@ -30,7 +30,6 @@ class Queue:
             return self._front.data
 
     def __str__(self) -> str:
-        print('str, front:', self._front)
         current_node = self._front
         acm = ""
         while current_node:
