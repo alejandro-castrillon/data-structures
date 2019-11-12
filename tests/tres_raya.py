@@ -9,7 +9,7 @@ from adt.lists.sll import SinglyLinkedList
 
 class VentanaTR(Gtk.Window):
     def __init__(self):
-        Gtk.Window.__init__(self, title="Tres en Raya")
+        super().__init__(title="Tres en Raya")
         self.connect("destroy", Gtk.main_quit)
 
         self.alternar = 0

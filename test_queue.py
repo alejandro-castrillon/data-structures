@@ -5,6 +5,7 @@ if __name__ == '__main__':
 
     print('is_empty:', queue.is_empty())
     print('len:', len(queue))
+    print('front:', queue.front)
 
     print('dequeue:', queue.dequeue())
 
@@ -30,10 +31,9 @@ if __name__ == '__main__':
     print('front:', queue.front)
     print('len:', len(queue))
 
-    for i in range(len(queue)):
+    for i in range(len(queue) + 1):
         print('-------------')
         print('queue:', queue, sep='\n')
         print('front:', queue.front)
         print('len:', len(queue))
         print('dequeue:', queue.dequeue())
-    print('queue:', queue)

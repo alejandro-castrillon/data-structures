@@ -28,9 +28,10 @@ class Postfix:
         operando y cada operador, incluyendo los paréntesis, por un espacio
         en blanco.
         """
-
         if self.__verify_expression(self.expression_infix):
-            self.expression_infix = self.__format_expression(self.expression_infix)
+            self.expression_infix = self.__format_expression(
+                self.expression_infix
+            )
             return self.expression_infix
 
     def postfix(self) -> str:
@@ -42,7 +43,7 @@ class Postfix:
         priorities = {"+": 1, "-": 1, "*": 2, "/": 2, "^": 3, "(": 0}
         operators_stack = Stack()
 
-        infix_list = self.__split_expression(self.infix(), " ")
+        infix_list = self.__split(self.infix(), " ")
         postfix_list = SinglyLinkedList()
 
         for i in infix_list:
@@ -86,7 +87,7 @@ class Postfix:
         utilizando una Stack, calculando el resultado final de la expresión.
         """
         result = None
-        postfix_list = self.__split_expression(self.postfix(), " ")
+        postfix_list = self.__split(self.postfix(), " ")
         operands_stack = Stack()
 
         for i in postfix_list:
@@ -110,28 +111,29 @@ class Postfix:
         expression = self.__remove_spaces(expression)
         for i in expression:
             if i not in "+-*/^()." and not i.isdigit():
-                raise Exception(f"Invalid character: {i}")
                 return False
         return True
 
     def __verify_operators(self, expression: str) -> bool:
         expression = self.__remove_spaces(expression)
-
         for i in range(len(expression)):
             try:
                 bad_order = (
-                    (expression[i] in "+-*/^(." and expression[i + 1] in "+*/^).")
+                    (
+                        expression[i] in "+-*/^(."
+                        and expression[i + 1] in "+-*/^)."
+                    )
+                    or (expression[i].isdigit() and expression[i + 1] == '(')
+                    or (expression[i] == ')' and expression[i + 1].isdigit())
+                    or (expression[i] == ')' and expression[i + 1] == '(')
                     or (expression[i] == "(" and expression[i + 1] == "-")
                     or expression[0] in "+*/^)."
                     or expression[len(expression)] in "+*/^(."
                 )
+                if bad_order:
+                    return not bad_order
             except:
-                bad_order = False
-            if bad_order:
-                raise Exception(
-                    f"Bad order of operators, parenthesis or dots at character {i}"
-                )
-                return not bad_order
+                pass
         return True
 
     def __balanced_parenthesis(self, expression: str) -> bool:
@@ -146,7 +148,6 @@ class Postfix:
                     break
                 stack.pop()
         if error or not stack.is_empty():
-            raise Exception("The parenthesis are not balanced")
             return False
         return True
 
@@ -179,16 +180,16 @@ class Postfix:
             expression = expression.replace(" ", "")
         return expression
 
-    def __split_expression(self, expression: str, sep: str = "") -> SinglyLinkedList:
+    def __split(self, string: str, sep: str = "") -> SinglyLinkedList:
         splited_list = SinglyLinkedList()
         if sep:
-            while sep in expression:
-                index = expression.find(sep)
-                splited_list.append(expression[:index])
-                expression = expression[index + 1 :]
-            splited_list.append(expression)
+            while sep in string:
+                index = string.find(sep)
+                splited_list.append(string[:index])
+                string = string[index + 1 :]
+            splited_list.append(string)
         else:
-            for i in expression:
+            for i in string:
                 splited_list.append(i)
         return splited_list
 
@@ -235,7 +236,9 @@ class Prefix:
         en blanco.
         """
         if self.__verify_expression(self.infix_expression):
-            self.infix_expression = self.__format_expression(self.infix_expression)
+            self.infix_expression = self.__format_expression(
+                self.infix_expression
+            )
             return self.infix_expression
 
     def prefix(self) -> str:
@@ -248,7 +251,7 @@ class Prefix:
         operators_stack = Stack()
 
         infix_expression = self.__reverse_expression(self.infix_expression)
-        infix_list = self.__split_expression(infix_expression, " ")
+        infix_list = self.__split(infix_expression, " ")
         prefix_list = SinglyLinkedList()
 
         for i in infix_list:
@@ -297,7 +300,7 @@ class Prefix:
         """
         result = None
         expression_prefix = self.__reverse_expression(self.prefix())
-        postfix_list = self.__split_expression(expression_prefix, " ")
+        postfix_list = self.__split(expression_prefix, " ")
         operands_stack = Stack()
 
         for i in postfix_list:
@@ -327,22 +330,24 @@ class Prefix:
 
     def __verify_operators(self, expression: str) -> bool:
         expression = self.__remove_spaces(expression)
-
         for i in range(len(expression)):
             try:
                 bad_order = (
-                    (expression[i] in "+-*/^(." and expression[i + 1] in "+*/^).")
+                    (
+                        expression[i] in "+-*/^(."
+                        and expression[i + 1] in "+-*/^)."
+                    )
+                    or (expression[i].isdigit() and expression[i + 1] == '(')
+                    or (expression[i] == ')' and expression[i + 1].isdigit())
+                    or (expression[i] == ')' and expression[i + 1] == '(')
                     or (expression[i] == "(" and expression[i + 1] == "-")
                     or expression[0] in "+*/^)."
                     or expression[len(expression)] in "+*/^(."
                 )
+                if bad_order:
+                    return not bad_order
             except:
-                bad_order = False
-            if bad_order:
-                raise Exception(
-                    f"Bad order of operators, parenthesis or dots at character {i}"
-                )
-                return not bad_order
+                pass
         return True
 
     def __balanced_parenthesis(self, expression: str) -> bool:
@@ -390,7 +395,7 @@ class Prefix:
             expression = expression.replace(" ", "")
         return expression
 
-    def __split_expression(self, expression: str, sep: str = ""):
+    def __split(self, expression: str, sep: str = "") -> SinglyLinkedList:
         splited_list = SinglyLinkedList()
         if sep:
             while sep in expression:
@@ -420,7 +425,7 @@ class Prefix:
         }[operator](float(operand1), float(operand2))
 
     def __reverse_expression(self, expression: str) -> str:
-        expression = self.__split_expression(expression, " ")
+        expression = self.__split(expression, " ")
         stack = Stack()
         for i in expression:
             stack.push(i)
@@ -430,4 +435,3 @@ class Prefix:
             expression += stack.pop() + " "
 
         return expression[: len(expression) - 1]
-

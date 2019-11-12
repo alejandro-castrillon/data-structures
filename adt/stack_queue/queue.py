@@ -3,36 +3,35 @@ from adt.stack_queue.nodes import QueueNode
 
 class Queue:
     def __init__(self) -> None:
-        self.__front = self.tail = None
+        self._front = self.tail = None
 
     def is_empty(self) -> bool:
-        return self.__front == None
+        return self._front == self.tail == None
 
     def enqueue(self, data) -> bool:
         new_node = QueueNode(data)
         if self.is_empty():
-            self.__front = new_node
-            self.tail = self.__front
-        elif type(data) == type(self.tail.data):
-            self.tail.next = new_node
-            self.tail = new_node
+            self._front = self.tail = new_node
+        elif type(data) == type(self._front()):
+            self.tail.next = self.tail = new_node
         else:
             return False
         return True
 
     def dequeue(self) -> object:
         if not self.is_empty():
-            data = self.front
-            self.__front = self.__front.next
+            data, self._front = self.front(), self._front.next
+            if not self._front:
+                self.tail = self._front
             return data
 
-    @property
     def front(self) -> object:
         if not self.is_empty():
-            return self.__front.data
+            return self._front.data
 
     def __str__(self) -> str:
-        current_node = self.__front
+        print('str, front:', self._front)
+        current_node = self._front
         acm = ""
         while current_node:
             acm += str(current_node.data) + "\n"
@@ -41,7 +40,7 @@ class Queue:
 
     def __len__(self) -> int:
         cnt = 0
-        current_node = self.__front
+        current_node = self._front
         while current_node:
             cnt += 1
             current_node = current_node.next

@@ -1,6 +1,6 @@
 import random
 
-from adt.stack_queue.pq import PriorityQueue
+from adt.stack_queue.pq import PriorityQueueNodes as PriorityQueue
 
 
 if __name__ == "__main__":
@@ -10,16 +10,18 @@ if __name__ == "__main__":
 
     for i in range(1, 10):
         index = random.randint(1, 5)
-        print(f"enqueue p{index} d{i}: {pq.enqueue(index, i)}")
+        print(f"enqueue p{index} d{i}")
         print(f"len: {len(pq)}")
         print(f"front: {pq.front()}")
+        print('enqueued', pq.enqueue(i, index))
+        print(pq)
 
-    print(pq)
     print("is_empty:", pq.is_empty())
 
     while not pq.is_empty():
         print(f"dequeue: [is_empty: {pq.is_empty()}, front: {pq.front()}]")
         print(pq.dequeue())
+        print(pq)
 
     print(f"dequeue: [is_empty: {pq.is_empty()}, front: {pq.front()}]")
     print(pq.dequeue())
