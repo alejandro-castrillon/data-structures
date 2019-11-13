@@ -1,2 +1,2 @@
 # data-structures
-A few classes to magage differents abstract data types coded in python
+A few classes to manage differents abstract data types coded in python
