@@ -43,7 +43,11 @@ class Postfix:
         priorities = {"+": 1, "-": 1, "*": 2, "/": 2, "^": 3, "(": 0}
         operators_stack = Stack()
 
-        infix_list = self.__split(self.infix(), " ")
+        expression_infix = self.infix()
+        if not expression_infix:
+            return
+
+        infix_list = self.__split(expression_infix, " ")
         postfix_list = SinglyLinkedList()
 
         for i in infix_list:
@@ -87,7 +91,12 @@ class Postfix:
         utilizando una Stack, calculando el resultado final de la expresión.
         """
         result = None
-        postfix_list = self.__split(self.postfix(), " ")
+
+        expression_postfix = self.postfix()
+        if not expression_postfix:
+            return
+
+        postfix_list = self.__split(expression_postfix, " ")
         operands_stack = Stack()
 
         for i in postfix_list:
@@ -123,15 +132,15 @@ class Postfix:
                         expression[i] in "+-*/^(."
                         and expression[i + 1] in "+-*/^)."
                     )
-                    or (expression[i].isdigit() and expression[i + 1] == '(')
-                    or (expression[i] == ')' and expression[i + 1].isdigit())
-                    or (expression[i] == ')' and expression[i + 1] == '(')
-                    or (expression[i] == "(" and expression[i + 1] == "-")
-                    or expression[0] in "+*/^)."
-                    or expression[len(expression)] in "+*/^(."
+                    or (expression[i].isdigit() and expression[i + 1] == "(")
+                    or (expression[i] == ")" and expression[i + 1].isdigit())
+                    or (expression[i] == ")" and expression[i + 1] == "(")
+                    or expression[0] in "+-*/^)."
+                    or expression[len(expression) - 1] in "+-*/^(."
+                    or (expression[i] == "." and expression[i + 2] == ".")
                 )
                 if bad_order:
-                    return not bad_order
+                    return False
             except:
                 pass
         return True
@@ -250,7 +259,11 @@ class Prefix:
         priorities = {"+": 1, "-": 1, "*": 2, "/": 2, "^": 3, ")": 4}
         operators_stack = Stack()
 
-        infix_expression = self.__reverse_expression(self.infix_expression)
+        infix_expression = self.infix()
+        if not infix_expression:
+            return
+
+        infix_expression = self.__reverse_expression(infix_expression)
         infix_list = self.__split(infix_expression, " ")
         prefix_list = SinglyLinkedList()
 
@@ -299,6 +312,10 @@ class Prefix:
         una Stack, calculando el resultado final de la expresión.
         """
         result = None
+
+        if not self.prefix():
+            return
+
         expression_prefix = self.__reverse_expression(self.prefix())
         postfix_list = self.__split(expression_prefix, " ")
         operands_stack = Stack()
@@ -324,7 +341,6 @@ class Prefix:
         expression = self.__remove_spaces(expression)
         for i in expression:
             if i not in "+-*/^()." and not i.isdigit():
-                raise Exception(f"Invalid character: {i}")
                 return False
         return True
 
@@ -337,15 +353,15 @@ class Prefix:
                         expression[i] in "+-*/^(."
                         and expression[i + 1] in "+-*/^)."
                     )
-                    or (expression[i].isdigit() and expression[i + 1] == '(')
-                    or (expression[i] == ')' and expression[i + 1].isdigit())
-                    or (expression[i] == ')' and expression[i + 1] == '(')
-                    or (expression[i] == "(" and expression[i + 1] == "-")
-                    or expression[0] in "+*/^)."
-                    or expression[len(expression)] in "+*/^(."
+                    or (expression[i].isdigit() and expression[i + 1] == "(")
+                    or (expression[i] == ")" and expression[i + 1].isdigit())
+                    or (expression[i] == ")" and expression[i + 1] == "(")
+                    or expression[0] in "+-*/^)."
+                    or expression[len(expression) - 1] in "+-*/^(."
+                    or (expression[i] == "." and expression[i + 2] == ".")
                 )
                 if bad_order:
-                    return not bad_order
+                    return False
             except:
                 pass
         return True
@@ -362,7 +378,6 @@ class Prefix:
                     break
                 stack.pop()
         if error or not stack.is_empty():
-            raise Exception("The parenthesis are not balanced")
             return False
         return True
 
